@@ -1,4 +1,4 @@
-import { Controller, Request, Post, UseGuards, Body } from '@nestjs/common';
+import { Controller, Request, Post, UseGuards, Body, UnauthorizedException, InternalServerErrorException } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { UserService } from './user.service';
@@ -10,10 +10,16 @@ export class AuthController {
     private userService: UserService,
   ) {}
 
-//   @UseGuards(AuthGuard('local'))
+  @UseGuards(AuthGuard('local'))
   @Post('login')
   async login(@Request() req) {
-    return this.authService.login(req.body.username, req.body.password);
+    if (!req.user) {
+      throw new UnauthorizedException('Invalid Credentials')
+    } try {
+      return this.authService.login(req);
+    } catch (error) {
+      throw new InternalServerErrorException('login failed')
+    }
   }
 
   @Post('register')
