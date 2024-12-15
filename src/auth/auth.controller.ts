@@ -16,9 +16,21 @@ export class AuthController {
     if (!req.user) {
       throw new UnauthorizedException('Invalid Credentials')
     } try {
-      return this.authService.login(req);
+      return this.authService.login(req.user);
     } catch (error) {
       throw new InternalServerErrorException('login failed')
+    }
+  }
+
+  @Post('refresh')
+  async refreshTokens(@Body('refresh_token') token: string) {
+    if (!token) {
+      throw new UnauthorizedException('Invalid or no token')
+    }
+    try {
+      return await this.authService.refreshToken(token);
+    } catch {
+      throw new UnauthorizedException('Invalid token')
     }
   }
 
